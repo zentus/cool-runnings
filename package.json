@@ -4,7 +4,7 @@
   "description": "An icey shell command runner 🇯🇲",
   "main": "app.js",
   "scripts": {
-    "test": "node test",
+    "test": "standard",
     "example": "node example"
   },
   "keywords": [
@@ -26,6 +26,7 @@
     "shell-exec": "^1.0.2"
   },
   "devDependencies": {
-    "chalk": "^2.4.1"
+    "chalk": "^2.4.1",
+    "standard": "^12.0.1"
   }
 }
