@@ -1,7 +1,7 @@
 {
   "name": "cool-runnings",
   "version": "0.0.1",
-  "description": "An icey shell command runner",
+  "description": "An icey shell command runner 🇯🇲",
   "main": "app.js",
   "scripts": {
     "test": "node test",

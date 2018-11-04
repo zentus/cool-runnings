@@ -14,14 +14,14 @@ const program = ({ arguments, flags }) => {
 	const message = arguments[0]
 	const coolFile = path.join(cwd, 'cool.file')
 	const needCoolFile = !has(coolFile)
-	const needIce = Boolean(flags.ice)
+	const needIce = Boolean(flags.ice) || Boolean(flags.i)
 	const iceFile = path.join(cwd, 'ice')
 	const hasIce = has(iceFile)
 	const needUncoolFile = hasIce && platform === 'win32'
 
 	const giveIce = {
-		command: 'touch ice && echo "cool runnings!❄️" >> ice',
-		success: bold.cyan('jah jah youth man 🇯🇲')
+		command: 'touch ice && echo "cool runnings ❄️" >> ice',
+		success: bold.cyan('Your ice: ❄️❄️❄️')
 	}
 
 	// Create an object like

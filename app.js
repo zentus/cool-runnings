@@ -5,12 +5,12 @@ const { log, error } = console
 
 // Flags
 // -d, dead
-// Outputs only stderr if exit code is not 0
+// Outputs nothing, but stderr if exit code !== 0
 
 // -q, quiet
-// Outputs only defined success messages, and stderr if exit code is not 0
+// Outputs only defined success messages, and stderr if exit code !== 0
 
-// Get CLI input
+// Get command line input
 const getInput = process => {
 	const { _: arguments, ...flags } = minimist(process.argv.slice(2))
 	return { arguments, flags }
