@@ -35,7 +35,7 @@ const program = ({ arguments, flags }) => {
 				command: has(coolFile),
 				success: green('\nNice file')
 			}, {
-				command: has(coolFile) && message && `echo "${message}" >> cool.file`,
+				command: has(coolFile) && message && `echo ${message} >> cool.file`,
 				success: green(`Wrote your message to the cool file`)
 			},
 			needIce && giveIce,
