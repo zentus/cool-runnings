@@ -1,0 +1,32 @@
+{
+  "name": "cool-runnings",
+  "version": "0.0.0",
+  "description": "An icey shell command runner",
+  "main": "app.js",
+  "scripts": {
+    "test": "node test",
+		"example": "node example"
+  },
+  "keywords": [
+    "cool",
+    "runnings",
+		"bash-in-js",
+    "shell",
+    "command",
+    "runner",
+		"queue",
+    "bash",
+    "zsh"
+  ],
+  "author": "zentus",
+  "license": "MIT",
+  "dependencies": {
+    "file-exists": "^5.0.1",
+    "minimist": "^1.2.0",
+    "p-waterfall": "^1.0.0",
+    "shell-exec": "^1.0.2"
+  },
+  "devDependencies": {
+    "chalk": "^2.4.1"
+  }
+}
