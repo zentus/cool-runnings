@@ -16,8 +16,13 @@ const program = ({ arguments, flags }) => {
 	const needCoolFile = !has(coolFile)
 	const needIce = Boolean(flags.ice)
 	const iceFile = path.join(cwd, 'ice')
-	const hasIce = has(ice)
+	const hasIce = has(iceFile)
 	const needUncoolFile = hasIce && platform === 'win32'
+
+	const giveIce = {
+		command: 'touch ice && echo "cool runnings!❄️" >> ice',
+		success: bold.cyan('jah jah youth man 🇯🇲')
+	}
 
 	// Create an object like
 	return {
@@ -27,18 +32,16 @@ const program = ({ arguments, flags }) => {
 				command: needCoolFile && 'touch cool.file',
 				success: green('Created a cool file')
 			}, {
-				command: have(coolFile),
+				command: has(coolFile),
 				success: green('\nNice file')
 			}, {
-				command: have(coolFile) && message && `echo "${message}" >> cool.file`,
+				command: has(coolFile) && message && `echo "${message}" >> cool.file`,
 				success: green(`Wrote your message to the cool file`)
-			}, {
-				command: needIce && 'touch ice && echo "cool runnings!❄️" >> ice',
-				postRun: () => log('i am postRun'),
-				success: bold.cyan('jah jah youth man 🇯🇲')
-			}, {
+			},
+			needIce && giveIce,
+			{
 				command: needUncoolFile && 'touch uncool-file.docx'
-		}],
+		}].filter(Boolean),
 		options: { hmm: '🤔' }
 	}
 }
