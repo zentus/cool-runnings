@@ -1,20 +1,20 @@
 {
   "name": "cool-runnings",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "An icey shell command runner",
   "main": "app.js",
   "scripts": {
     "test": "node test",
-		"example": "node example"
+    "example": "node example"
   },
   "keywords": [
     "cool",
     "runnings",
-		"bash-in-js",
+    "bash-in-js",
     "shell",
     "command",
     "runner",
-		"queue",
+    "queue",
     "bash",
     "zsh"
   ],
