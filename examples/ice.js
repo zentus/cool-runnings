@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+
 const cwd = process.cwd()
 const { platform } = process
 const fs = require('fs')
 const path = require('path')
 const has = fs.existsSync
 
-const { run } = require('./app')
+const { run } = require('../app')
 const chalk = require('chalk')
 const { green, bold } = chalk
 
@@ -36,10 +37,11 @@ const program = (args, flags) => {
       command: has(coolFile) && message && `echo ${message} >> cool.file`,
       success: green(`Wrote your message to the cool file`)
     },
+    // Falsey items in 'actions' will be filtered out
     needIce && giveIce,
     {
       command: needUncoolFile && 'touch uncool-file.docx'
-    }].filter(Boolean),
+    }],
     options: { hmm: '🤔' }
   }
 }

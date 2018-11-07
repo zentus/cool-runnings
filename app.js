@@ -2,6 +2,7 @@ const shell = require('shell-exec')
 const minimist = require('minimist')
 const waterfall = require('p-waterfall')
 const { log, error } = console
+const { isArray } = Array
 
 // Flags
 // -d, dead
@@ -52,12 +53,38 @@ const createQueue = program => {
     })
 }
 
+const getProgram = (programCreator, input) => {
+  if (isArray(programCreator)) {
+    const convertItem = item => {
+      if (typeof item === 'string') {
+        return { command: item }
+      }
+
+      return item
+    }
+
+    return {
+      actions: programCreator.map(item => convertItem(item)).filter(Boolean)
+    }
+  }
+
+  if (!isArray(programCreator) && typeof programCreator === 'object') {
+    return programCreator
+  }
+
+  if (typeof programCreator === 'function') {
+    return programCreator(input.args, input.flags)
+  }
+
+  throw new Error(`run() expected the first argument to be either a function, object or an array. Got type: ${typeof programCreator}`)
+}
+
 // Get command line arguments and flags
 // Use programCreator to create program object
 // Create and start the action queue
 const run = programCreator => {
   const input = getInput(process)
-  const program = programCreator(input.args, input.flags)
+  const program = getProgram(programCreator, input)
   const queue = createQueue(program)
 
   waterfall(queue)

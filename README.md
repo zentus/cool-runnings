@@ -11,7 +11,25 @@ npm install cool-runnings
 ```
 
 ## Usage
+```javascript
+// minimal.js
+const { run } = require('cool-runnings')
 
+const program = [
+  'echo "Whats up?"',
+  'echo "Not much, how about you?"'
+]
+
+run(program)
+```
+
+```bash
+$ node minimal.js
+# => Whats up?
+# => Not much, how about you?
+```
+
+You can also run it with flags and arguments
 ```javascript
 // myprogram.js
 const { run } = require('cool-runnings')
@@ -42,6 +60,8 @@ $ node myprogram.js --read
 # => Hello there
 # => Successfully read file
 ```
+
+[See more examples](https://github.com/zentus/cool-runnings/tree/master/examples)
 
 ## License
 
