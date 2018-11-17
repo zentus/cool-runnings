@@ -25,17 +25,17 @@ const handle = (action, options) => shell(action.command)
 
     if (code !== 0 && stderr) {
       if (!flags.d && action.error) log(action.error)
+      if (!flags.q && !flags.d && stdout) log(stdout)
       throw new Error(stderr)
+    }
+
+    if (code !== 0) {
+      throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
     }
 
     if (code === 0 && stderr) {
       if (!flags.d && !flags.q) log(stderr)
       if (!flags.d && action.warn) log(action.warn)
-      return result
-    }
-
-    if (code !== 0) {
-      throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
     }
 
     if (!flags.d && !flags.q && stdout) log(stdout)
