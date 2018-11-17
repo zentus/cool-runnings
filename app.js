@@ -26,20 +26,24 @@ const handle = (action, options) => shell(action.command)
     if (code !== 0 && stderr) {
       if (!flags.d && action.error) log(action.error)
       if (!flags.q && !flags.d && stdout) log(stdout)
+      if (action.onError) action.onError(result)
       throw new Error(stderr)
     }
 
     if (code !== 0) {
+      if (action.onError) action.onError(result)
       throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
     }
 
     if (code === 0 && stderr) {
       if (!flags.d && !flags.q) log(stderr)
       if (!flags.d && action.warn) log(action.warn)
+      if (action.onWarn) action.onWarn(result)
     }
 
     if (!flags.d && !flags.q && stdout) log(stdout)
     if (!flags.d && action.success) log(action.success)
+    if (action.onSuccess) action.onSuccess(result)
 
     return result
   })
