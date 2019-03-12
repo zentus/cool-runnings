@@ -18,42 +18,65 @@ const getInput = process => {
 }
 
 // Handle shell command
-const handle = (action, options) => shell(action.command)
-  .then(result => {
-    const { stdout, stderr, code } = result
-    const { flags } = getInput(process)
+const handle = (action, options, preRunPromise) => preRunPromise.then(preRun => {
+	if (preRun) {
+		log(preRun)
+	}
 
-    if (code !== 0 && stderr) {
-      if (!flags.d && action.error) log(action.error)
-      if (!flags.q && !flags.d && stdout) log(stdout)
-      if (action.onError) action.onError(result)
-      throw new Error(stderr)
-    }
+	if (action.onPreRun && typeof action.onPreRun === 'function') {
+		action.onPreRun(action)
+	}
 
-    if (code !== 0) {
-      if (action.onError) action.onError(result)
-      throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
-    }
+	return shell(action.command)
+		.then(result => {
+			const { stdout, stderr, code } = result
+			const { flags } = getInput(process)
 
-    if (code === 0 && stderr) {
-      if (!flags.d && !flags.q) log(stderr)
-      if (!flags.d && action.warn) log(action.warn)
-      if (action.onWarn) action.onWarn(result)
-    }
+			if (options.quiet) {
+				flags.q = true
+			}
 
-    if (!flags.d && !flags.q && stdout) log(stdout)
-    if (!flags.d && action.success) log(action.success)
-    if (action.onSuccess) action.onSuccess(result)
+			if (options.dead) {
+				flags.d = true
+			}
 
-    return result
-  })
+			if (code !== 0 && stderr) {
+				if (!flags.d && action.error) log(action.error)
+				if (!flags.q && !flags.d && stdout) log(stdout)
+				if (action.onError) action.onError(result)
+				throw new Error(stderr)
+			}
+
+			if (code !== 0) {
+				if (action.onError) action.onError(result)
+				if (action.error) log(action.error)
+				throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
+			}
+
+			if (code === 0 && stderr) {
+				if (!flags.d && !flags.q) log(stderr)
+				if (!flags.d && action.warn) log(action.warn)
+				if (action.onWarn) action.onWarn(result)
+			}
+
+			if (!flags.d && !flags.q && stdout) log(stdout)
+			if (!flags.d && action.success) log(action.success)
+			if (action.onSuccess) action.onSuccess(result)
+
+			return result
+		})
+})
 
 // Creates an action queue using program object
 const createQueue = program => {
+	const preRunPromise = preRun => new Promise(resolve => {
+    resolve(preRun)
+	})
+
   return program.actions
     .filter(action => action.command)
     .map(action => {
-      return () => handle(action, program.options)
+      return () => handle(action, program.options, preRunPromise(action.preRun))
     })
 }
 
@@ -91,14 +114,7 @@ const run = programCreator => {
   const program = getProgram(programCreator, input)
   const queue = createQueue(program)
 
-  waterfall(queue)
-    .then(result => {
-      // const lastCommand = {
-      //   action: program.actions.find(action => action.command === cmd),
-      //   result
-      // }
-    })
-    .catch(err => error(err))
+  waterfall(queue).catch(err => error(err))
 }
 
 module.exports = { getInput, run }
