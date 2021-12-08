@@ -1,12 +1,12 @@
 {
   "name": "cool-runnings",
-  "version": "0.0.11",
+  "version": "1.0.0",
   "description": "An icey shell command runner 🇯🇲",
   "main": "app.js",
   "scripts": {
     "test": "standard",
     "example": "node example",
-    "lint:fix": "standard --fix" 
+    "lint:fix": "standard --fix"
   },
   "keywords": [
     "cool",
