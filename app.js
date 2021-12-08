@@ -12,7 +12,7 @@ const getPreRunPromise = preRun => new Promise(resolve => {
   resolve(preRun)
 })
 
-const handleAction = (action, options = {}, preRunPromise, ignoreAction) => preRunPromise.then(preRun => {
+const handleAction = (action, options = {}, preRunPromise, ignoreAction, lastExecuted) => preRunPromise.then(preRun => {
   const { flags } = getInput(process)
 
   if (options.quiet) {
@@ -46,7 +46,8 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction) => preR
       stdout: '',
       stderr: '',
       ignored: true,
-      name: action.name
+      name: action.name,
+      lastExecuted
     }
 
     if (typeof action.ignored === 'function') {
@@ -66,7 +67,8 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction) => preR
       const result = {
         ...rawResult,
         ignored: false,
-        name: action.name
+        name: action.name,
+        lastExecuted
       }
       const { stdout, stderr, code } = result
 
@@ -114,15 +116,15 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction) => preR
 const createQueue = program => {
   return program.actions
     .map((actionFunc, index) => {
-      return previousResult => {
-        const actionRaw = actionFunc(previousResult)
+      return lastExecuted => {
+        const actionRaw = actionFunc(lastExecuted)
         const action = {
           ...actionRaw,
           name: actionRaw.name || index
         }
         const preRunPromise = getPreRunPromise(action.preRun)
         const ignoreAction = !action.command
-        return handleAction(action, program.options, preRunPromise, ignoreAction)
+        return handleAction(action, program.options, preRunPromise, ignoreAction, lastExecuted)
       }
     })
 }
