@@ -1,114 +1,151 @@
 const shell = require('shell-exec')
 const minimist = require('minimist')
 const waterfall = require('p-waterfall')
-const { log, error } = console
-const { isArray } = Array
+const { log, error, warn } = console
 
-// Flags
-// -d, dead
-// Outputs nothing but stderr if exit code !== 0
-
-// -q, quiet
-// Outputs only defined success messages, and stderr if exit code !== 0
-
-// Get command line input
 const getInput = process => {
   const { _: args, ...flags } = minimist(process.argv.slice(2))
   return { args, flags }
 }
 
-// Handle shell command
-const handle = (action, options, preRunPromise) => preRunPromise.then(preRun => {
-	if (preRun) {
-		log(preRun)
-	}
-
-	if (action.onPreRun && typeof action.onPreRun === 'function') {
-		action.onPreRun(action)
-	}
-
-	return shell(action.command)
-		.then(result => {
-			const { stdout, stderr, code } = result
-			const { flags } = getInput(process)
-
-			if (options.quiet) {
-				flags.q = true
-			}
-
-			if (options.dead) {
-				flags.d = true
-			}
-
-			if (code !== 0 && stderr) {
-				if (!flags.d && action.error) log(action.error)
-				if (!flags.q && !flags.d && stdout) log(stdout)
-				if (action.onError) action.onError(result)
-				throw new Error(stderr)
-			}
-
-			if (code !== 0) {
-				if (action.onError) action.onError(result)
-				if (action.error) log(action.error)
-				throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
-			}
-
-			if (code === 0 && stderr) {
-				if (!flags.d && !flags.q) log(stderr)
-				if (!flags.d && action.warn) log(action.warn)
-				if (action.onWarn) action.onWarn(result)
-			}
-
-			if (!flags.d && !flags.q && stdout) log(stdout)
-			if (!flags.d && action.success) log(action.success)
-			if (action.onSuccess) action.onSuccess(result)
-
-			return result
-		})
+const getPreRunPromise = preRun => new Promise(resolve => {
+  resolve(preRun)
 })
 
-// Creates an action queue using program object
-const createQueue = program => {
-	const preRunPromise = preRun => new Promise(resolve => {
-    resolve(preRun)
-	})
+const handleAction = (action, options = {}, preRunPromise, ignoreAction) => preRunPromise.then(preRun => {
+  const { flags } = getInput(process)
 
+  if (options.quiet) {
+    flags.q = true
+  }
+
+  if (options.dead) {
+    flags.d = true
+    flags.q = true
+  }
+
+  if (options.verbose) {
+    flags.v = true
+    flags.d = false
+    flags.q = false
+  }
+
+  if (preRun && !flags.d) {
+    log(preRun)
+  }
+
+  if (action.onPreRun && typeof action.onPreRun === 'function' && !flags.d) {
+    action.onPreRun(action)
+  }
+
+  if (ignoreAction) {
+    if (flags.v) log(`Ignored action ${action.name}`)
+
+    const ignoredResult = {
+      code: null,
+      stdout: '',
+      stderr: '',
+      ignored: true,
+      name: action.name
+    }
+
+    if (typeof action.ignored === 'function') {
+      action.ignored = action.ignored(ignoredResult)
+    }
+
+    if (action.ignored && !flags.q && !flags.d) log(action.ignored)
+    if (action.onIgnored && !flags.q && !flags.d) action.onIgnored(ignoredResult)
+
+    return new Promise(resolve => resolve(ignoredResult))
+  }
+
+  return shell(action.command)
+    .then(rawResult => {
+      if (flags.v) log(`Started action: ${action.name}`)
+
+      const result = {
+        ...rawResult,
+        ignored: false,
+        name: action.name
+      }
+      const { stdout, stderr, code } = result
+
+      if (typeof action.error === 'function') {
+        action.error = action.error(result)
+      }
+
+      if (typeof action.warn === 'function') {
+        action.warn = action.warn(result)
+      }
+
+      if (typeof action.success === 'function') {
+        action.success = action.success(result)
+      }
+
+      if (code !== 0 && stderr) {
+        if (action.error && !flags.d) error(action.error)
+        if (stdout && !flags.q && !flags.d) error(stdout)
+        if (action.onError && !flags.d) action.onError(result)
+        throw new Error(stderr)
+      }
+
+      if (code !== 0 && !stderr) {
+        if (action.onError && !flags.d) action.onError(result)
+        if (action.error && !flags.d) log(action.error)
+        throw new Error(`Command '${action.command}' returned exit code: ${code}.`)
+      }
+
+      if (code === 0 && stderr) {
+        if (!flags.d && !flags.q) warn(stderr)
+        if (action.warn && !flags.d) warn(action.warn)
+        if (action.onWarn && !flags.d) action.onWarn(result)
+
+        return result
+      }
+
+      if (stdout && !flags.d && !flags.q) log(stdout)
+      if (action.success && !flags.d) log(action.success)
+      if (action.onSuccess && !flags.d) action.onSuccess(result)
+
+      return result
+    })
+})
+
+const createQueue = program => {
   return program.actions
-    .filter(action => action.command)
-    .map(action => {
-      return () => handle(action, program.options, preRunPromise(action.preRun))
+    .map((actionFunc, index) => {
+      return previousResult => {
+        const actionRaw = actionFunc(previousResult)
+        const action = {
+          ...actionRaw,
+          name: actionRaw.name || index
+        }
+        const preRunPromise = getPreRunPromise(action.preRun)
+        const ignoreAction = !action.command
+        return handleAction(action, program.options, preRunPromise, ignoreAction)
+      }
     })
 }
 
 const getProgram = (programCreator, input) => {
-  if (isArray(programCreator)) {
-    const convertItem = item => {
-      if (typeof item === 'string') {
-        return { command: item }
-      }
+  if (typeof programCreator !== 'function') {
+    throw new Error(`run(program) expected the first argument to be a function. Instead got type '${typeof programCreator}'.`)
+  }
 
-      return item
+  const program = programCreator(input.args, input.flags)
+
+  if (!Array.isArray(program.actions)) {
+    throw new Error(`run(program) expected program to return an object with the key 'actions' being an array. Instead got type '${typeof program.actions}'.`)
+  }
+
+  program.actions.forEach(action => {
+    if (typeof action !== 'function') {
+      throw new Error(`run(program) expected program to return an object with the key 'actions' being an array of functions. Instead got an item of type '${typeof program.actions}' in 'actions'.`)
     }
+  })
 
-    return {
-      actions: programCreator.map(item => convertItem(item)).filter(Boolean)
-    }
-  }
-
-  if (!isArray(programCreator) && typeof programCreator === 'object') {
-    return programCreator
-  }
-
-  if (typeof programCreator === 'function') {
-    return programCreator(input.args, input.flags)
-  }
-
-  throw new Error(`run() expected the first argument to be either a function, object or an array. Got type: ${typeof programCreator}`)
+  return program
 }
-
-// Get command line arguments and flags
-// Use programCreator to create program object
-// Create and start the action queue
 const run = programCreator => {
   const input = getInput(process)
   const program = getProgram(programCreator, input)

@@ -4,26 +4,16 @@ const program = (args, flags) => {
   const name = args[0]
 
   return {
-    actions: [{
-      command: name ? `echo "Whats up ${name}?"` : 'echo "Whats up?"'
-    }, {
-      // If command is falsey, it will be skipped
-      command: flags.answer && 'echo "Not much, how about you?"'
-    }, {
-      command: flags.answer && 'echo "Same"'
-    }]
+    actions: [
+      () => ({
+        command: name ? `echo "Whats up ${name}?"` : 'echo "Whats up?"'
+      }),
+      previous => ({
+        // If command is falsy, it will be ignored
+        command: flags.answer && `echo "You said: *${previous.stdout.trim()}*. My answer is not much, how about you?"`
+      })
+    ]
   }
 }
 
 run(program)
-
-// $ node conditional
-// => Whats up?
-
-// $ node conditional Odeya
-// => Whats up Odeya?
-
-// $ node conditional Odeya --answer
-// => Whats up Odeya?
-// => Not much, how about you?
-// => Same

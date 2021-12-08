@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "standard",
-    "example": "node example"
+    "example": "node example",
+    "lint:fix": "standard --fix" 
   },
   "keywords": [
     "cool",
@@ -31,6 +32,6 @@
   },
   "devDependencies": {
     "chalk": "^2.4.1",
-    "standard": "^12.0.1"
+    "standard": "^16.0.4"
   }
 }

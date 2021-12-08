@@ -1,46 +1,13 @@
-# cool-runnings
-> An icey shell command runner ❄
-
-## Why?
-Because Unix commands and Node.js are both awesome
-
-## Installation
-
-```sh
-npm install cool-runnings
-```
-
-## Usage
-
-```javascript
-const { run } = require('cool-runnings')
-
-const program = () => {
-  return {
-    actions: [
-      () => ({
-        command: 'echo "Hello!"'
-      }),
-      () => ({
-        command: 'echo "Hi!"'
-      })
-    ]
-  }
-}
-
-run(program)
-```
-
-### Advanced
-```javascript
-const { run } = require('cool-runnings')
+const { run } = require('../app') // const { run } = require('cool-runnings')
 
 const program = (args, flags) => {
   const message = args[0]
 
   return {
     options: {
-      verbose: true
+      // quiet: true
+      // dead: true
+      // verbose: true
     },
     actions: [
       () => ({
@@ -51,14 +18,33 @@ const program = (args, flags) => {
         ignored: ({ name }) => `ignored: Action "${name}" was ignored`,
         name: 'WriteFileAction'
       }),
+
+      // ## Action
+      // An action must be a function.
+
+      // ## Previous
+      // The action function recieves an object containing properties 'stdout', 'stderr', 'code', 'ignored' and 'name'
+      // for the previous action.
+      // If ignored === true, it means the previous action was omitted because the value of the 'command' property was falsy.
       previous => ({
+        // ## Unix command
+        // Command will be omitted if this value is undefined.
         command: flags.read && 'cat file.txt',
+
+        // For debugging. Defaults to action index.
         name: 'ReadFileAction',
+
+        // ## Log hooks
+        // Can be either a string or a function.
+        // Functions recieve an object containing keys 'stdout', 'stderr', 'code', 'ignored' and 'name'.
         preRun: 'preRun: Will try to read file',
         success: `success: Successfully read file. Previous action stdout: ${previous.stdout}`,
         error: 'error: Failed to read file',
         warn: ({ code, stderr }) => `warn: Exited with code ${code}, but stdout was not empty: ${stderr}`,
         ignored: ({ name }) => `ignored: Action "${name}" was ignored`,
+
+        // ## Function hooks
+        // Recieves an object containing keys 'stdout', 'stderr', 'code' and 'ignored'.
         onPreRun: () => console.log('onPreRun: Will try to read file'),
         onSuccess: () => console.log(`onSuccess: Successfully read file. Previous action stdout: ${previous.stdout}`),
         onError: () => console.log('onError: Failed to read file'),
@@ -70,29 +56,15 @@ const program = (args, flags) => {
 }
 
 run(program)
-```
 
-## Flags and args
-```bash
-# args[0] === "Hello there"
-$ node myprogram.js "Hello there"
+// Write to file
+// $ node readme.js hello
 
-# flags.read === true
-$ node myprogram.js --read
-```
+// Write to file and read from file
+// $ node readme.js hello --read
 
-## Options
-**dead**
-Outputs nothing, except for stderr if exit code is not 0
+// Read from file
+// $ node readme.js --read
 
-**quiet**
-Outputs only defined success messages, and stderr if exit code is not 0
-
-**verbose**
-Outputs everything, including debug messages
-
-[See more examples](https://github.com/zentus/cool-runnings/tree/master/examples)
-
-## License
-
-MIT
+// Do nothing
+// $ node readme.js

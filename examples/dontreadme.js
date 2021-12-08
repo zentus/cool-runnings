@@ -1,39 +1,4 @@
-# cool-runnings
-> An icey shell command runner ❄
-
-## Why?
-Because Unix commands and Node.js are both awesome
-
-## Installation
-
-```sh
-npm install cool-runnings
-```
-
-## Usage
-
-```javascript
-const { run } = require('cool-runnings')
-
-const program = () => {
-  return {
-    actions: [
-      () => ({
-        command: 'echo "Hello!"'
-      }),
-      () => ({
-        command: 'echo "Hi!"'
-      })
-    ]
-  }
-}
-
-run(program)
-```
-
-### Advanced
-```javascript
-const { run } = require('cool-runnings')
+const { run } = require('../app') // const { run } = require('cool-runnings')
 
 const program = (args, flags) => {
   const message = args[0]
@@ -70,29 +35,3 @@ const program = (args, flags) => {
 }
 
 run(program)
-```
-
-## Flags and args
-```bash
-# args[0] === "Hello there"
-$ node myprogram.js "Hello there"
-
-# flags.read === true
-$ node myprogram.js --read
-```
-
-## Options
-**dead**
-Outputs nothing, except for stderr if exit code is not 0
-
-**quiet**
-Outputs only defined success messages, and stderr if exit code is not 0
-
-**verbose**
-Outputs everything, including debug messages
-
-[See more examples](https://github.com/zentus/cool-runnings/tree/master/examples)
-
-## License
-
-MIT
