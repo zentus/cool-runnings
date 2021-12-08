@@ -102,8 +102,6 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, history
         if (!flags.d && !flags.q) warn(stderr)
         if (action.warn && !flags.d) warn(action.warn)
         if (action.onWarn && !flags.d) action.onWarn(result)
-
-        return result
       }
 
       if (stdout && !flags.d && !flags.q) log(stdout)
