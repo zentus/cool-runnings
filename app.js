@@ -1,6 +1,7 @@
 const shell = require('shell-exec')
 const minimist = require('minimist')
 const waterfall = require('p-waterfall')
+const omit = require('object.omit')
 const { log, error, warn } = console
 
 const getInput = process => {
@@ -12,7 +13,7 @@ const getPreRunPromise = preRun => new Promise(resolve => {
   resolve(preRun)
 })
 
-const handleAction = (action, options = {}, preRunPromise, ignoreAction, lastExecuted) => preRunPromise.then(preRun => {
+const handleAction = (action, options = {}, preRunPromise, ignoreAction, history) => preRunPromise.then(preRun => {
   const { flags } = getInput(process)
 
   if (options.quiet) {
@@ -47,7 +48,7 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, lastExe
       stderr: '',
       ignored: true,
       name: action.name,
-      lastExecuted
+      history
     }
 
     if (typeof action.ignored === 'function') {
@@ -68,7 +69,7 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, lastExe
         ...rawResult,
         ignored: false,
         name: action.name,
-        lastExecuted
+        history
       }
       const { stdout, stderr, code } = result
 
@@ -114,9 +115,14 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, lastExe
 })
 
 const createQueue = program => {
+  const history = []
+
   return program.actions
     .map((actionFunc, index) => {
       return lastExecuted => {
+        if (lastExecuted) {
+          history.push(omit(lastExecuted, 'history'))
+        }
         const actionRaw = actionFunc(lastExecuted)
         const action = {
           ...actionRaw,
@@ -124,7 +130,7 @@ const createQueue = program => {
         }
         const preRunPromise = getPreRunPromise(action.preRun)
         const ignoreAction = !action.command
-        return handleAction(action, program.options, preRunPromise, ignoreAction, lastExecuted)
+        return handleAction(action, program.options, preRunPromise, ignoreAction, history)
       }
     })
 }
