@@ -1,6 +1,6 @@
 {
   "name": "cool-runnings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An icey shell command runner 🇯🇲",
   "main": "app.js",
   "scripts": {
