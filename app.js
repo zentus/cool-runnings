@@ -110,6 +110,13 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, history
 
       return result
     })
+    .then(result => {
+      if (action.onPostRun && typeof action.onPostRun === 'function') {
+        action.onPostRun(result)
+      }
+
+      return result
+    })
 })
 
 const createQueue = program => {
