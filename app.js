@@ -35,7 +35,7 @@ const handleAction = (action, options = {}, preRunPromise, ignoreAction, history
     log(preRun)
   }
 
-  if (action.onPreRun && typeof action.onPreRun === 'function') {
+  if (action.onPreRun && typeof action.onPreRun === 'function' && !flags.d) {
     action.onPreRun(action)
   }
 
