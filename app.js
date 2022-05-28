@@ -1,4 +1,4 @@
-const shell = require('shell-exec')
+const shell = require('shell-exec').default
 const minimist = require('minimist')
 const waterfall = require('p-waterfall')
 const omit = require('object.omit')
