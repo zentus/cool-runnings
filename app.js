@@ -157,7 +157,7 @@ const run = programCreator => {
   const program = getProgram(programCreator, input)
   const queue = createQueue(program)
 
-  waterfall(queue).catch(err => error(err))
+  return waterfall(queue).catch(err => error(err))
 }
 
 module.exports = { getInput, run }
