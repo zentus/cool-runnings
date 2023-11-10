@@ -1,12 +1,16 @@
 {
   "name": "cool-runnings",
   "version": "1.4.0",
-  "description": "An icey shell command runner 🇯🇲",
+  "description": "An icy shell command runner",
   "main": "app.js",
   "scripts": {
     "test": "standard",
-    "example": "node example",
-    "lint:fix": "standard --fix"
+    "example:simple": "node examples/simple.js",
+    "example:conditional": "node examples/conditional.js",
+    "example:readme": "node examples/readme.js",
+    "example:dontreadme": "node examples/dontreadme.js",
+    "lint": "eslint . --fix",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [
     "cool",
@@ -26,6 +30,7 @@
   "author": "zentus",
   "license": "MIT",
   "dependencies": {
+    "@zentus/eslint-config-zen": "^1.1.1",
     "minimist": "^1.2.0",
     "object.omit": "^3.0.0",
     "p-waterfall": "^1.0.0",
@@ -33,6 +38,6 @@
   },
   "devDependencies": {
     "chalk": "^2.4.1",
-    "standard": "^16.0.4"
+    "eslint": "^8.53.0"
   }
 }
