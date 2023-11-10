@@ -1,7 +1,7 @@
-const { run } = require('../app')
+const { run } = require('../app') // const { run } = require('cool-runnings')
 
 const program = (args, flags) => {
-  const name = args[0]
+  const [name] = args
 
   return {
     actions: [

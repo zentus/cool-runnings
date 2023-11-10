@@ -1,5 +1,5 @@
 # cool-runnings
-> An icey shell command runner ❄
+> An icy shell command runner ❄
 
 ## Why?
 Because Unix commands and Node.js are both awesome
@@ -18,10 +18,10 @@ const { run } = require('cool-runnings')
 const program = () => {
   return {
     actions: [
-      () => ({
+      async () => ({
         command: 'echo "Hello!"'
       }),
-      () => ({
+      async () => ({
         command: 'echo "Hi!"'
       })
     ]
@@ -43,7 +43,7 @@ const program = (args, flags) => {
       verbose: true
     },
     actions: [
-      () => ({
+      async () => ({
         command: message && `echo ${message} >> file.txt && echo "ok"`,
         preRun: 'preRun: Will try to write message to file',
         success: 'success: Wrote message to file',
@@ -51,7 +51,7 @@ const program = (args, flags) => {
         ignored: ({ name }) => `ignored: Action "${name}" was ignored`,
         name: 'WriteFileAction'
       }),
-      previous => ({
+      async previous => ({
         command: flags.read && 'cat file.txt',
         name: 'ReadFileAction',
         preRun: 'preRun: Will try to read file',

@@ -1,4 +1,4 @@
-const { run } = require('cool-runnings')
+const { run } = require('../app') // const { run } = require('cool-runnings')
 
 const program = () => {
   return {

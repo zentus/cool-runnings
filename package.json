@@ -9,6 +9,7 @@
     "example:conditional": "node examples/conditional.js",
     "example:readme": "node examples/readme.js",
     "example:dontreadme": "node examples/dontreadme.js",
+    "example:async": "node examples/async.js",
     "lint": "eslint . --fix",
     "lint:fix": "eslint . --fix"
   },
